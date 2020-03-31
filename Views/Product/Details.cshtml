@@ -1,0 +1,40 @@
+﻿@model interview.Models.Product
+
+@{
+    ViewBag.Title = "Detais";
+}
+
+<h2>Details</h2>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UnitPrice)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UnitCost)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.QuanityPerUnit)
+        </th>
+
+    </tr>
+    <tr>
+        <td>
+            @Html.DisplayFor(model => model.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.UnitPrice)
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.UnitCost)
+        </td>
+        <td>
+            @Html.DisplayFor(model => model.QuanityPerUnit)
+        </td>
+    </tr>
+
+
+</table>

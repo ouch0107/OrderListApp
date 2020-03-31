@@ -1,0 +1,98 @@
+﻿<!-- development version, includes helpful console warnings -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+@Scripts.Render("~/bundles/jquery")
+
+<div id="app">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Order Id</th>
+                <th>Order Item</th>
+                <th>Price</th>
+                <th>Cost</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="order in orders">
+                <td><input type="checkbox" v-model="selectedOrders" :value="order" :disabled="order.Status !== 1" /></td>
+                <td>{{ order.OrderId }}</td>
+                <td><a :href="'/Product/Details/' + order.ProductId">{{ getProductName(order.ProductId) }}</a></td>
+                <td>{{ calPrice(order.ProductId, order.Quantity) }}</td>
+                <td>{{ calCost(order.ProductId, order.Quantity) }}</td>
+                <td v-if="order.Status == 1">Payment Completed</td>
+                <td v-if="order.Status == 2">to be Shipped</td>
+            </tr>
+        </tbody>
+    </table>
+    <button type="button" class="btn btn-primary" v-on:click="updateStatus">Confirm</button>
+</div>
+
+<script>
+    var app = new Vue({
+        el: "#app",
+        data: {
+            orders: [],
+            products: [],
+            selectedOrders: [],
+        },
+        created() {
+            this.getOrders();
+            this.getProducts();
+        },
+        methods: {
+            getOrders() {
+                const _this = this;
+
+                $.ajax({
+                    url: "/Order/GetOrders",
+                    type: "Get",
+                    success: function (response) {
+                        _this.orders = response;
+                    }
+                })
+            },
+            getProducts() {
+                const _this = this;
+
+                $.ajax({
+                    url: "/Product/GetProducts",
+                    type: "Get",
+                    success: function (response) {
+                        _this.products = response;
+                    }
+                })
+            },
+            calPrice(productId, quantity) {
+                if (this.products.length == 0)
+                    return
+                return this.products.filter(item => item.ProductId == productId)[0].UnitPrice * quantity;
+            },
+            calCost(productId, quantity) {
+                if (this.products.length == 0)
+                    return
+                return this.products.filter(item => item.ProductId == productId)[0].UnitCost * quantity;
+            },
+            getProductName(productId) {
+                if (this.products.length == 0)
+                    return
+                return this.products.filter(item => item.ProductId == productId)[0].Name;
+            },
+            updateStatus() {
+                const _this = this;
+                if (_this.selectedOrders.length == 0)
+                    return
+                
+                $.ajax({
+                    url: "/order/confirm",
+                    type: "put",
+                    data: {orders: _this.selectedOrders},
+                    success: function () {
+                        location.reload();
+                    }
+                })
+            },
+        }
+    })
+</script>
