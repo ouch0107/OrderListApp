@@ -1,41 +1,84 @@
 ﻿<!-- development version, includes helpful console warnings -->
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://kit.fontawesome.com/6bc99bb13a.js" crossorigin="anonymous"></script>
 @Scripts.Render("~/bundles/jquery")
 
 <div id="app">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Order Id</th>
-                <th>Order Item</th>
-                <th>Price</th>
-                <th>Cost</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="order in orders">
-                <td><input type="checkbox" v-model="selectedOrders" :value="order" :disabled="order.Status !== 1" /></td>
-                <td>{{ order.OrderId }}</td>
-                <td><a :href="'/Product/Details/' + order.ProductId">{{ getProductName(order.ProductId) }}</a></td>
-                <td>{{ calPrice(order.ProductId, order.Quantity) }}</td>
-                <td>{{ calCost(order.ProductId, order.Quantity) }}</td>
-                <td v-if="order.Status == 1">Payment Completed</td>
-                <td v-if="order.Status == 2">to be Shipped</td>
-            </tr>
-        </tbody>
-    </table>
-    <button type="button" class="btn btn-primary" v-on:click="updateStatus">Confirm</button>
+    <div class="row orderPage">
+        <div class="col-sm-4">
+            <div class="row">
+                <div class="col-sm-6">
+                    <label>Item: </label>
+                    <form>
+                        <select id="itemSelection" class="form-control" v-model="selectedProduct">
+                            <option v-for="product in products" v-bind:value="product">{{ product.Name }}</option>
+                        </select>
+                    </form>
+                </div>
+                <div class="col-sm-6">
+                    <label>Amount: </label>
+                    <div class="input-group">
+                        <input v-model="amount" type="text" class="form-control" placeholder="Amount">
+                        <div class="input-group-append" id="button-addon">
+                            <button class="btn btn-outline-secondary" type="button" v-on:click="amount += 1">+</button>
+                            <button class="btn btn-outline-secondary" type="button" v-on:click="amount -= 1">-</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <label>Name: </label><p>{{ selectedProduct.Name }}</p>
+            <label>QuanityPerUnit: </label><p>{{ selectedProduct.QuanityPerUnit }}</p>
+            <label>UnitPrice: </label><p>{{ selectedProduct.UnitPrice }}</p>
+            <button type="button" class="btn btn-primary" v-on:click="createOrder">Buy it!</button>
+        </div>
+        <div class="col-sm-8">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Order Id</th>
+                        <th>Order Item</th>
+                        <th>Price</th>
+                        <th>Cost</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="order in orders">
+                        <td><input type="checkbox" v-model="selectedOrders" :value="order" :disabled="order.Status !== 1" /></td>
+                        <td>{{ order.OrderId }}</td>
+                        <td><a :href="'/Product/Details/' + order.ProductId">{{ getProductName(order.ProductId) }}</a></td>
+                        <td>{{ calPrice(order.ProductId, order.Quantity) }}</td>
+                        <td>{{ calCost(order.ProductId, order.Quantity) }}</td>
+                        <td v-if="order.Status == 1">Payment Completed</td>
+                        <td v-if="order.Status == 2">to be Shipped</td>
+                        <td><span><i class="fas fa-trash" v-on:click="deleteOrder(order.OrderId)"></i></span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" class="btn btn-primary" v-on:click="updateStatus">Confirm</button>
+
+        </div>
+    </div>      
 </div>
+
+<style>
+    .orderPage {
+        margin-top: 15px;
+    }
+</style>
 
 <script>
     var app = new Vue({
-        el: "#app",
+        el: '#app',
         data: {
             orders: [],
             products: [],
             selectedOrders: [],
+            selectedProduct: {},
+            amount: 0,
         },
         created() {
             this.getOrders();
@@ -89,6 +132,44 @@
                     type: "put",
                     data: {orders: _this.selectedOrders},
                     success: function () {
+                        location.reload();
+                    }
+                })
+            },
+            createOrder() {                
+                const _this = this;
+                if ((Object.keys(_this.selectedProduct).length === 0 && _this.selectedProduct.constructor === Object) || _this.amount <= 0)
+                    return;
+
+                const url = "/Order/Create";
+                let payload = {
+                    ProductId: _this.selectedProduct.ProductId,
+                    CustomerId: 1, // 暫時先直接塞1,之後會使用.NET Identity辨別使用者
+                    Quantity: _this.amount,
+                    Status: 1,
+                };
+
+                $.ajax({
+                    url: url,
+                    type: "post",
+                    data: payload,
+                    success: function (response) {
+                        location.reload();
+                    }
+                })                
+            },
+            deleteOrder(orderId) {                
+                const _this = this;
+                const url = "/Order/Delete";
+                let payload = {
+                    orderId: orderId           
+                };
+
+                $.ajax({
+                    url: url,
+                    type: "delete",
+                    data: payload,
+                    success: function (response) {
                         location.reload();
                     }
                 })

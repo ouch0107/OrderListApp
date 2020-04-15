@@ -13,11 +13,13 @@ namespace interview.Controllers
     public class OrderController : Controller
     {
         // GET: Order
+        [System.Web.Mvc.Authorize]
         public ActionResult Index()
         {
             return View();
         }
 
+        [System.Web.Mvc.Authorize]
         [System.Web.Mvc.HttpGet]
         public ActionResult GetOrders()
         {
@@ -26,6 +28,7 @@ namespace interview.Controllers
             return Content(JsonConvert.SerializeObject(result), "application/json");
         }
 
+        [System.Web.Mvc.Authorize]
         [System.Web.Mvc.HttpPut]
         public ActionResult Confirm([FromBody]List<Order> orders)
         {
@@ -40,11 +43,15 @@ namespace interview.Controllers
         //    return View();
         //}
 
-        //// GET: Order/Create
-        //public ActionResult Create()
-        //{
-        //    return View();
-        //}
+        [System.Web.Mvc.Authorize]
+        [System.Web.Mvc.HttpPost]
+        public ActionResult Create([FromBody]Order order)
+        {
+            var orderService = new OrderService();
+            var result = orderService.Create(order);
+            return Content(JsonConvert.SerializeObject(new { isSuccess = result, order }), "application/json");
+
+        }
 
         //// POST: Order/Create
         //[HttpPost]
@@ -84,11 +91,13 @@ namespace interview.Controllers
         //    }
         //}
 
-        //// GET: Order/Delete/5
-        //public ActionResult Delete(int id)
-        //{
-        //    return View();
-        //}
+        [System.Web.Mvc.HttpDelete]
+        public ActionResult Delete([FromBody]int orderId)
+        {
+            var orderService = new OrderService();
+            var result = orderService.Delete(orderId);
+            return Content(JsonConvert.SerializeObject(new { isSuccess = result, orderId }), "application/json");
+        }
 
         //// POST: Order/Delete/5
         //[HttpPost]

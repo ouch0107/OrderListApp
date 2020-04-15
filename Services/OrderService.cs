@@ -20,5 +20,17 @@ namespace interview.Services
             var orderRepository = new OrderRepository();
             return orderRepository.Confirm(orders);
         }
+
+        public bool Create(Order order)
+        {
+            var orderRepository = new OrderRepository();
+            return orderRepository.Create(order);
+        }
+
+        public bool Delete(int orderId)
+        {
+            var orderRepository = new OrderRepository();
+            return orderRepository.Delete(orderId);
+        }
     }
 }

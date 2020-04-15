@@ -25,11 +25,12 @@ namespace interview.Models
             unpaid = 0,
             paymentCompleted = 1,
             toBeShipped = 2,
-            arriced = 3
+            arrived = 3
         }
         [JsonIgnore]
         public virtual Customer Customer { get; set; }
         [JsonIgnore]
         public virtual Product Product { get; set; }
+        public virtual ICollection<ShippingOrder> ShippingOrders { get; set; }
     }
 }
